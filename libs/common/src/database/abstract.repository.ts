@@ -1,6 +1,6 @@
 import { Logger, NotFoundException } from '@nestjs/common';
 import { AbstractDocument } from './abstract.schema';
-import { Model, Types, FilterQuery, UpdateQuery } from 'mongoose';
+import { Model, Types, FilterQuery, UpdateQuery, mongo } from 'mongoose';
 
 export abstract class AbstractRepository<TDocument extends AbstractDocument> {
   protected abstract readonly logger: Logger;
@@ -16,8 +16,10 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
 
   async findOne(filterQuery: FilterQuery<TDocument>): Promise<TDocument> {
     const document = await this.model
+      // .findOne({ _id: new mongo.ObjectId(filterQuery._id) })
       .findOne(filterQuery)
       .lean<TDocument>(true);
+
     if (!document) {
       this.logger.warn(`Document not found: ${JSON.stringify(filterQuery)}`);
       throw new NotFoundException('Document not found');
@@ -42,13 +44,13 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
     return document;
   }
 
-  async find(filterQuery: FilterQuery<TDocument>): Promise<TDocument[]> {
+  async findAll(filterQuery: FilterQuery<TDocument>): Promise<TDocument[]> {
     return this.model.find(filterQuery).lean<TDocument[]>(true);
   }
 
   async findOneAndDelete(
     filterQuery: FilterQuery<TDocument>,
-    update: UpdateQuery<TDocument>,
+    // update: UpdateQuery<TDocument>,
   ): Promise<TDocument> {
     return this.model.findOneAndDelete(filterQuery).lean<TDocument>(true);
   }
