@@ -10,5 +10,6 @@ export class CreateUserDto {
   @IsEmail()
   email: string;
   // @IsStrongPassword()
+  @IsNotEmpty()
   password: string;
 }
